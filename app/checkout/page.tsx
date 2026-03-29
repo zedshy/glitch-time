@@ -1,12 +1,19 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useWallet } from "@solana/wallet-adapter-react"
 import { useConnection } from "@solana/wallet-adapter-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { useVaultStore } from "@/store/vault-store"
 import { useRouter } from "next/navigation"
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui"
@@ -18,8 +25,10 @@ interface CustomerInfo {
   email: string
   address: string
   city: string
-  state: string
-  zipCode: string
+  state?: string // US/Other
+  county?: string // UK
+  zipCode?: string // US
+  postcode?: string // UK
   country: string
 }
 
@@ -40,10 +49,42 @@ export default function CheckoutPage() {
     email: "",
     address: "",
     city: "",
-    state: "",
-    zipCode: "",
-    country: "United States",
+    country: "United Kingdom",
   })
+
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  const isUK = customerInfo.country === "United Kingdom"
+  const isUS = customerInfo.country === "United States"
+
+  const countries = [
+    "United Kingdom",
+    "United States",
+    "Germany",
+    "France",
+    "Italy",
+    "Spain",
+    "Netherlands",
+    "Belgium",
+    "Switzerland",
+    "Austria",
+    "Sweden",
+    "Norway",
+    "Denmark",
+    "Finland",
+    "Poland",
+    "Portugal",
+    "Ireland",
+    "Greece",
+    "Czech Republic",
+    "Hungary",
+    "Romania",
+    "Other",
+  ]
   const [formErrors, setFormErrors] = useState<Partial<Record<keyof CustomerInfo, string>>>({})
 
   const validateForm = (): boolean => {
@@ -63,12 +104,35 @@ export default function CheckoutPage() {
     if (!customerInfo.city.trim()) {
       errors.city = "City is required"
     }
-    if (!customerInfo.state.trim()) {
-      errors.state = "State is required"
+    
+    // UK-specific validation
+    if (isUK) {
+      if (!customerInfo.county?.trim()) {
+        errors.county = "County is required"
+      }
+      if (!customerInfo.postcode?.trim()) {
+        errors.postcode = "Postcode is required"
+      }
+    } 
+    // US-specific validation
+    else if (isUS) {
+      if (!customerInfo.state?.trim()) {
+        errors.state = "State is required"
+      }
+      if (!customerInfo.zipCode?.trim()) {
+        errors.zipCode = "ZIP code is required"
+      }
     }
-    if (!customerInfo.zipCode.trim()) {
-      errors.zipCode = "ZIP code is required"
+    // Other countries - require state/province and postal code
+    else {
+      if (!customerInfo.state?.trim()) {
+        errors.state = "State/Province is required"
+      }
+      if (!customerInfo.zipCode?.trim()) {
+        errors.zipCode = "Postal code is required"
+      }
     }
+    
     if (!customerInfo.country.trim()) {
       errors.country = "Country is required"
     }
@@ -281,72 +345,139 @@ export default function CheckoutPage() {
                   )}
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium text-white mb-2 block">
-                      City <span className="text-destructive">*</span>
-                    </label>
-                    <Input
-                      type="text"
-                      placeholder="New York"
-                      value={customerInfo.city}
-                      onChange={(e) => setCustomerInfo({ ...customerInfo, city: e.target.value })}
-                      className={formErrors.city ? "border-destructive" : ""}
-                    />
-                    {formErrors.city && (
-                      <p className="text-xs text-destructive mt-1">{formErrors.city}</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="text-sm font-medium text-white mb-2 block">
-                      State <span className="text-destructive">*</span>
-                    </label>
-                    <Input
-                      type="text"
-                      placeholder="NY"
-                      value={customerInfo.state}
-                      onChange={(e) => setCustomerInfo({ ...customerInfo, state: e.target.value })}
-                      className={formErrors.state ? "border-destructive" : ""}
-                    />
-                    {formErrors.state && (
-                      <p className="text-xs text-destructive mt-1">{formErrors.state}</p>
-                    )}
-                  </div>
+                <div>
+                  <label className="text-sm font-medium text-white mb-2 block">
+                    City <span className="text-destructive">*</span>
+                  </label>
+                  <Input
+                    type="text"
+                    placeholder={isUK ? "London" : "New York"}
+                    value={customerInfo.city}
+                    onChange={(e) => setCustomerInfo({ ...customerInfo, city: e.target.value })}
+                    className={formErrors.city ? "border-destructive" : ""}
+                  />
+                  {formErrors.city && (
+                    <p className="text-xs text-destructive mt-1">{formErrors.city}</p>
+                  )}
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium text-white mb-2 block">
-                      ZIP Code <span className="text-destructive">*</span>
-                    </label>
-                    <Input
-                      type="text"
-                      placeholder="10001"
-                      value={customerInfo.zipCode}
-                      onChange={(e) => setCustomerInfo({ ...customerInfo, zipCode: e.target.value })}
-                      className={formErrors.zipCode ? "border-destructive" : ""}
-                    />
-                    {formErrors.zipCode && (
-                      <p className="text-xs text-destructive mt-1">{formErrors.zipCode}</p>
-                    )}
-                  </div>
+                {/* UK-specific fields */}
+                {isUK && (
+                  <>
+                    <div>
+                      <label className="text-sm font-medium text-white mb-2 block">
+                        County <span className="text-destructive">*</span>
+                      </label>
+                      <Input
+                        type="text"
+                        placeholder="Greater London"
+                        value={customerInfo.county || ""}
+                        onChange={(e) => setCustomerInfo({ ...customerInfo, county: e.target.value, state: undefined, zipCode: undefined })}
+                        className={formErrors.county ? "border-destructive" : ""}
+                      />
+                      {formErrors.county && (
+                        <p className="text-xs text-destructive mt-1">{formErrors.county}</p>
+                      )}
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-white mb-2 block">
+                        Postcode <span className="text-destructive">*</span>
+                      </label>
+                      <Input
+                        type="text"
+                        placeholder="SW1A 1AA"
+                        value={customerInfo.postcode || ""}
+                        onChange={(e) => setCustomerInfo({ ...customerInfo, postcode: e.target.value, zipCode: undefined })}
+                        className={formErrors.postcode ? "border-destructive" : ""}
+                      />
+                      {formErrors.postcode && (
+                        <p className="text-xs text-destructive mt-1">{formErrors.postcode}</p>
+                      )}
+                    </div>
+                  </>
+                )}
 
-                  <div>
-                    <label className="text-sm font-medium text-white mb-2 block">
-                      Country <span className="text-destructive">*</span>
-                    </label>
+                {/* US and Other countries fields */}
+                {!isUK && (
+                  <>
+                    <div>
+                      <label className="text-sm font-medium text-white mb-2 block">
+                        {isUS ? "State" : "State/Province"} <span className="text-destructive">*</span>
+                      </label>
+                      <Input
+                        type="text"
+                        placeholder={isUS ? "NY" : "Province"}
+                        value={customerInfo.state || ""}
+                        onChange={(e) => setCustomerInfo({ ...customerInfo, state: e.target.value, county: undefined, postcode: undefined })}
+                        className={formErrors.state ? "border-destructive" : ""}
+                      />
+                      {formErrors.state && (
+                        <p className="text-xs text-destructive mt-1">{formErrors.state}</p>
+                      )}
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-white mb-2 block">
+                        {isUS ? "ZIP Code" : "Postal Code"} <span className="text-destructive">*</span>
+                      </label>
+                      <Input
+                        type="text"
+                        placeholder={isUS ? "10001" : "Postal Code"}
+                        value={customerInfo.zipCode || ""}
+                        onChange={(e) => setCustomerInfo({ ...customerInfo, zipCode: e.target.value, postcode: undefined })}
+                        className={formErrors.zipCode ? "border-destructive" : ""}
+                      />
+                      {formErrors.zipCode && (
+                        <p className="text-xs text-destructive mt-1">{formErrors.zipCode}</p>
+                      )}
+                    </div>
+                  </>
+                )}
+
+                <div>
+                  <label className="text-sm font-medium text-white mb-2 block">
+                    Country <span className="text-destructive">*</span>
+                  </label>
+                  {mounted ? (
+                    <Select
+                      value={customerInfo.country || "United Kingdom"}
+                      onValueChange={(value) => {
+                        // Clear country-specific fields when changing country
+                        setCustomerInfo({
+                          ...customerInfo,
+                          country: value,
+                          state: value !== "United Kingdom" ? customerInfo.state : undefined,
+                          county: value === "United Kingdom" ? customerInfo.county : undefined,
+                          zipCode: value !== "United Kingdom" ? customerInfo.zipCode : undefined,
+                          postcode: value === "United Kingdom" ? customerInfo.postcode : undefined,
+                        })
+                      }}
+                    >
+                      <SelectTrigger 
+                        className={formErrors.country ? "border-destructive" : ""}
+                        suppressHydrationWarning
+                      >
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {countries.map((country) => (
+                          <SelectItem key={country} value={country}>
+                            {country}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
                     <Input
                       type="text"
-                      placeholder="United States"
-                      value={customerInfo.country}
-                      onChange={(e) => setCustomerInfo({ ...customerInfo, country: e.target.value })}
-                      className={formErrors.country ? "border-destructive" : ""}
+                      value={customerInfo.country || "United Kingdom"}
+                      readOnly
+                      className="bg-muted"
+                      suppressHydrationWarning
                     />
-                    {formErrors.country && (
-                      <p className="text-xs text-destructive mt-1">{formErrors.country}</p>
-                    )}
-                  </div>
+                  )}
+                  {formErrors.country && (
+                    <p className="text-xs text-destructive mt-1">{formErrors.country}</p>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -396,7 +527,7 @@ export default function CheckoutPage() {
                   <p className="text-muted-foreground">
                     Connect your Solana wallet to proceed
                   </p>
-                  <WalletMultiButton className="w-full" />
+                  {mounted && <WalletMultiButton className="w-full" />}
                   <div className="p-3 bg-muted/50 rounded-lg border border-muted">
                     <p className="text-xs text-muted-foreground">
                       💡 <strong>Demo Mode:</strong> Make sure your wallet is connected to <strong>Solana Devnet</strong>. You'll need devnet SOL for transactions. Get free devnet SOL from{" "}
