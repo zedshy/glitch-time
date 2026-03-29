@@ -47,7 +47,7 @@ export function AboutSection() {
             <div className="space-y-4 text-gray-300 leading-relaxed">
               <p>
                 GLITCH TIME exists at the intersection of traditional luxury and digital innovation. 
-                We don't follow trends—we create them. Each watch is a statement piece for the on-chain era, 
+                We do not follow trends—we create them. Each watch is a statement piece for the on-chain era, 
                 where craftsmanship meets blockchain verification.
               </p>
               <p>

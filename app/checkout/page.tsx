@@ -530,7 +530,7 @@ export default function CheckoutPage() {
                   {mounted && <WalletMultiButton className="w-full" />}
                   <div className="p-3 bg-muted/50 rounded-lg border border-muted">
                     <p className="text-xs text-muted-foreground">
-                      💡 <strong>Demo Mode:</strong> Make sure your wallet is connected to <strong>Solana Devnet</strong>. You'll need devnet SOL for transactions. Get free devnet SOL from{" "}
+                      💡 <strong>Demo Mode:</strong> Make sure your wallet is connected to <strong>Solana Devnet</strong>. You will need devnet SOL for transactions. Get free devnet SOL from{" "}
                       <a 
                         href="https://faucet.solana.com" 
                         target="_blank" 
@@ -547,7 +547,7 @@ export default function CheckoutPage() {
                   <div className="p-4 bg-muted rounded-lg">
                     <p className="text-sm text-muted-foreground mb-1">Wallet Address</p>
                     <p className="text-sm text-white font-mono break-all">
-                      {publicKey.toString()}
+                      {publicKey?.toString() ?? "—"}
                     </p>
                   </div>
 
