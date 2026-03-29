@@ -23,16 +23,17 @@ Treat it as a **tutorial codebase**: read the structure, run it locally, then tr
 2. [What you can learn](#what-you-can-learn)  
 3. [Prerequisites](#prerequisites)  
 4. [Quick start](#quick-start)  
-5. [Using the demo](#using-the-demo)  
-6. [Routes and pages](#routes-and-pages)  
-7. [Project structure](#project-structure)  
-8. [Important files](#important-files)  
-9. [Environment variables](#environment-variables)  
-10. [Media assets (images & video)](#media-assets-images--video)  
-11. [Limitations (read before presenting)](#limitations-read-before-presenting)  
-12. [Ideas for assignments](#ideas-for-assignments)  
-13. [Troubleshooting](#troubleshooting)  
-14. [Tech stack](#tech-stack)  
+5. [Deploy on Vercel (from GitHub)](#deploy-on-vercel-from-github)  
+6. [Using the demo](#using-the-demo)  
+7. [Routes and pages](#routes-and-pages)  
+8. [Project structure](#project-structure)  
+9. [Important files](#important-files)  
+10. [Environment variables](#environment-variables)  
+11. [Media assets (images & video)](#media-assets-images--video)  
+12. [Limitations (read before presenting)](#limitations-read-before-presenting)  
+13. [Ideas for assignments](#ideas-for-assignments)  
+14. [Troubleshooting](#troubleshooting)  
+15. [Tech stack](#tech-stack)  
 
 ---
 
@@ -108,6 +109,29 @@ Open [http://localhost:3000](http://localhost:3000).
 npm run build
 npm start
 ```
+
+---
+
+## Deploy on Vercel (from GitHub)
+
+Vercel deploys from **this GitHub repository** after you connect it once. Every push to the branch you select (usually `main`) triggers a new production deployment.
+
+### One-time setup
+
+1. Sign in at [vercel.com](https://vercel.com) with your **GitHub** account.  
+2. Click **Add New… → Project** (or **Import**).  
+3. Choose **Import Git Repository** and select **`zedshy/glitch-time`** (or your fork).  
+4. Leave defaults: **Framework Preset** = Next.js, **Root Directory** = `.`, **Build Command** = `next build`, **Output** = Next.js default.  
+5. Under **Environment Variables**, add at least:  
+   - `ADMIN_TOKEN` — same value you use locally (e.g. a random secret). Required for `/admin` and `GET /api/orders`.  
+6. Click **Deploy**.  
+
+After that, **Vercel watches GitHub**: new commits on `main` deploy automatically. Pull requests can use **Preview** deployments if enabled in the project settings.
+
+**Quick import link (opens Vercel with this repo):**  
+[https://vercel.com/new/clone?repository-url=https://github.com/zedshy/glitch-time](https://vercel.com/new/clone?repository-url=https://github.com/zedshy/glitch-time)
+
+If you use a **fork**, replace the URL with your fork’s `https://github.com/<you>/glitch-time` in the dashboard import step.
 
 ---
 
